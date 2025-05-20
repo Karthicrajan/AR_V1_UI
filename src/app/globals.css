@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* Custom utility classes */
+@layer components {
+  .hover-card {
+    @apply transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-secondary-500;
+  }
+}
+
+/* Ant Design overrides */
+.ant-layout {
+  background: rgb(var(--background-rgb)) !important;
+}
+
+.ant-card {
+  @apply rounded-lg;
+}
+
+.ant-menu-item {
+  @apply rounded-md mx-2 my-1;
+}
+
+.ant-statistic-title {
+  @apply text-neutral-600;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
