@@ -7,7 +7,6 @@ import {
   theme,
   Card,
   message as antMessage,
-  Table,
   Upload,
   List,
 } from 'antd';
@@ -17,22 +16,30 @@ import {
   DeleteOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { uploadFile } from '@/api-services/uploadFileService';
 import * as XLSX from 'xlsx';
+import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
 const { Header, Sider, Content } = Layout;
 const { Dragger } = Upload;
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function Home() {
   const router = useRouter();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [collapsed, setCollapsed] = useState(false);
-  const [tableData, setTableData] = useState<any>([]);
-  const [tableColumns, setTableColumns] = useState<any>([]);
+  const [spreadsheetData, setSpreadsheetData] = useState<any[][]>([]);
+  const [columnDefs, setColumnDefs] = useState<any[]>([]);
+  const [rowData, setRowData] = useState<any[]>([]);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -55,27 +62,37 @@ export default function Home() {
 
         if (jsonData.length === 0) return;
 
-        const headers = jsonData[0] as string[];
-        const rows = jsonData.slice(1);
+        // Convert to Spreadsheet format
+        const formatted = jsonData.map((row: any) =>
+          row.map((cell: any) => ({
+            value: cell ?? '',
+          }))
+        );
 
-        const columns = headers?.map((header: string, index: number) => ({
-          title: header || `Column ${index + 1}`,
-          dataIndex: `col_${index}`,
-          key: `col_${index}`,
-          width: 150,
-          ellipsis: true,
-        }));
+        setSpreadsheetData(formatted);
 
-        const data = rows.map((row: any, rowIndex: number) => {
-          const rowData: any = { key: rowIndex };
-          row.forEach((cell: any, colIndex: any) => {
-            rowData[`col_${colIndex}`] = cell;
+        // AG Grid: Convert to columnDefs and rowData
+        if (formatted.length > 0) {
+          const agColumnDefs = formatted[0].map((_: any, colIdx: number) => ({
+            headerName: `Col ${colIdx + 1}`,
+            field: `col${colIdx}`,
+            filter: true,
+            sortable: true,
+            resizable: true,
+          }));
+          const agRowData = formatted.slice(1).map((rowArr: any[]) => {
+            const rowObj: any = {};
+            rowArr.forEach((cell: any, colIdx: number) => {
+              rowObj[`col${colIdx}`] = cell.value;
+            });
+            return rowObj;
           });
-          return rowData;
-        });
-
-        setTableColumns(columns);
-        setTableData(data);
+          setColumnDefs(agColumnDefs);
+          setRowData(agRowData);
+        } else {
+          setColumnDefs([]);
+          setRowData([]);
+        }
         setFileList([]);
 
         return result;
@@ -96,6 +113,14 @@ export default function Home() {
 
   const handleRemove = (file: any) => {
     setFileList((prev: any) => prev.filter((f: any) => f?.uid !== file?.uid));
+  };
+
+  const handleDownloadExcel = () => {
+    const aoaData = spreadsheetData.map((row) => row.map((cell) => cell.value || ''));
+    const ws = XLSX.utils.aoa_to_sheet(aoaData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'spreadsheet-export.xlsx');
   };
 
   return (
@@ -195,41 +220,42 @@ export default function Home() {
               </div>
             </Card>
 
-            {tableData.length > 0 && (
+            {spreadsheetData.length > 0 && (
               <Card className="mt-8">
-                <div className='flex justify-between my-2 mx-2'>
-                  <div>
-                    <h1 className='font-bold'>Excel View</h1>
-                  </div>
-                  <div>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        // Reconstruct original rows
-                        const headers = tableColumns.map((col: any) => col.title);
-                        const rows = tableData.map((row: any) =>
-                          tableColumns.map((col: any) => row[col.dataIndex] || '')
-                        );
-                        const fullData = [headers, ...rows];
-
-                        const worksheet = XLSX.utils.aoa_to_sheet(fullData);
-                        const workbook = XLSX.utils.book_new();
-                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-                        XLSX.writeFile(workbook, 'uploaded-data.xlsx');
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-medium">Excel Data Preview</h2>
+                  <Button icon={<DownloadOutlined />} onClick={handleDownloadExcel}>
+                    Download Excel
+                  </Button>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: 700,
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                    background: '#fff',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    padding: 0,
+                  }}
+                >
+                  <div
+                    className="ag-theme-alpine"
+                    style={{ width: '100%', height: '100%' }}
+                  >
+                    <AgGridReact
+                      rowData={rowData}
+                      columnDefs={columnDefs.map(col => ({ ...col, filter: undefined }))}
+                      defaultColDef={{
+                        sortable: true,
+                        resizable: true,
                       }}
-                    >
-                      Download Excel
-                    </Button>
+                      pagination={false}
+                      paginationPageSize={100}
+                    />
                   </div>
                 </div>
-
-                <Table
-                  columns={tableColumns}
-                  dataSource={tableData}
-                  bordered
-                  scroll={{ x: 'max-content' }}
-                  pagination={{ pageSize: 10 }}
-                />
               </Card>
             )}
           </div>

@@ -17,6 +17,8 @@
     "@mescius/spread-sheets-react": "^18.0.7",
     "@tanstack/react-query": "^5.81.2",
     "@types/react-resizable": "^3.0.8",
+    "ag-grid-community": "^34.0.0",
+    "ag-grid-react": "^34.0.0",
     "antd": "^5.24.9",
     "axios": "^1.10.0",
     "file-saver": "^2.0.5",
@@ -25,6 +27,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-resizable": "^3.0.5",
+    "react-spreadsheet": "^0.10.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
