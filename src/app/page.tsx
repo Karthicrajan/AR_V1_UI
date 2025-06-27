@@ -16,13 +16,9 @@ export default function LoginPage() {
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
-      // Here you would typically make an API call to authenticate
       console.log('Login values:', values);
+  
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // If login successful, redirect to upload page
       router.push('/upload');
     } catch (error) {
       message.error('Login failed. Please try again.');
@@ -34,7 +30,6 @@ export default function LoginPage() {
   return (
     <Layout className="min-h-screen">
       <Content className="flex">
-        {/* Left side - Lottie Animation */}
         <div className="w-1/2 bg-gray-50 flex items-center justify-center p-8">
           <div className="w-full max-w-lg">
             <Lottie
@@ -45,7 +40,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right side - Login Form */}
         <div className="w-1/2 flex items-center justify-center p-12">
           <div className="max-w-md w-full">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>

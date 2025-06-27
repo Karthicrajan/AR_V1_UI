@@ -5,7 +5,7 @@ import ExcelViewerClient from '../../components/ExcelViewerClient';
 import React, { useState, useRef, useEffect } from 'react';
 
 const ComparePage = () => {
-  const [leftWidth, setLeftWidth] = useState(33); // Initial width in percentage
+  const [leftWidth, setLeftWidth] = useState(33);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
@@ -21,7 +21,7 @@ const ComparePage = () => {
     const containerRect = containerRef.current.getBoundingClientRect();
     const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
     
-    // Limit the width between 20% and 80%
+
     if (newLeftWidth >= 20 && newLeftWidth <= 80) {
       setLeftWidth(newLeftWidth);
     }
@@ -45,7 +45,6 @@ const ComparePage = () => {
 
   return (
     <div ref={containerRef} className="flex h-screen w-full">
-      {/* Left: PDF Section */}
       <div 
         className="h-full overflow-auto p-4 bg-gray-50 border-r"
         style={{ width: `${leftWidth}%` }}
@@ -53,13 +52,11 @@ const ComparePage = () => {
         <PdfAccordion />
       </div>
 
-      {/* Resizable Divider */}
       <div
         className="w-1 h-full bg-gray-200 hover:bg-blue-500 cursor-col-resize"
         onMouseDown={handleMouseDown}
       />
 
-      {/* Right: Excel Section */}
       <div 
         className="h-full overflow-auto p-4 bg-white"
         style={{ width: `${100 - leftWidth}%` }}
