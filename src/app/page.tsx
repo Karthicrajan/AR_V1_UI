@@ -17,9 +17,11 @@ export default function LoginPage() {
     setLoading(true);
     try {
       console.log('Login values:', values);
-  
-      
-      router.push('/upload');
+      if(values.username === 'demo@gmail.com' && values.password === 'Demo@123'){
+        router.push('/upload');
+      }else{
+        message.error('Invalid username or password');
+      }
     } catch (error) {
       message.error('Login failed. Please try again.');
     } finally {
