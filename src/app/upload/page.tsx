@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import SortableFilter from '../../component/SortableFilter'
 import {
   Layout,
   Button,
@@ -19,7 +20,6 @@ import {
   DownloadOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
-import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { uploadFile } from '@/api-services/uploadFileService';
 import * as XLSX from 'xlsx';
@@ -28,13 +28,13 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
+
 const { Header, Sider, Content } = Layout;
 const { Dragger } = Upload;
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function Home() {
-  const router = useRouter();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [spreadsheetData, setSpreadsheetData] = useState<any[][]>([]);
@@ -115,6 +115,12 @@ export default function Home() {
     setFileList((prev: any) => prev.filter((f: any) => f?.uid !== file?.uid));
   };
 
+  const handleApply = (selectFilter: any) => {
+    console.log(selectFilter)
+    apiCall.mutate();
+
+  }
+
   const handleDownloadExcel = () => {
     const aoaData = spreadsheetData.map((row) => row.map((cell) => cell.value || ''));
     const ws = XLSX.utils.aoa_to_sheet(aoaData);
@@ -153,72 +159,64 @@ export default function Home() {
           <div className="mx-auto">
             <h1 className="text-2xl font-bold text-neutral-800 mb-6">File Upload</h1>
 
-            <Card className="hover:shadow-lg transition-shadow">
-              <Dragger
-                multiple
-                accept=".xls,.xlsx"
-                fileList={fileList}
-                onChange={({ fileList }) => setFileList(fileList)}
-                beforeUpload={() => false}
-                className="mb-4"
-              >
-                <p className="ant-upload-drag-icon">
-                  <InboxOutlined className="text-4xl text-primary-500" />
-                </p>
-                <p className="ant-upload-text text-lg font-medium">
-                  Click or drag files to this area to upload
-                </p>
-                <p className="ant-upload-hint text-neutral-500">
-                  Support for multiple files upload.
-                </p>
-              </Dragger>
+            <div className='grid grid-cols-12 gap-10'>
+                <Card className="hover:shadow-lg transition-shadow col-span-8">
+                  <Dragger
+                    accept=".xls,.xlsx"
+                    fileList={fileList}
+                    onChange={({ fileList }) => setFileList(fileList)}
+                    beforeUpload={() => false}
+                    className="mb-4"
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined className="text-4xl text-primary-500" />
+                    </p>
+                    <p className="ant-upload-text text-lg font-medium">
+                      Click or drag files to this area to upload
+                    </p>
+                  </Dragger>
 
-              {fileList.length > 0 && (
-                <div className="mt-6">
-                  <h2 className="text-lg font-medium mb-4">Uploaded Files</h2>
-                  <List
-                    dataSource={fileList}
-                    renderItem={(file: any) => (
-                      <List.Item
-                        className="bg-neutral-50 rounded-lg p-4 mb-2"
-                        actions={[
-                          <Button
-                            key="delete"
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleRemove(file)}
-                          />,
-                        ]}
-                      >
-                        <div className="flex items-center gap-4">
-                          <FileOutlined className="text-2xl text-primary-500" />
-                          <div>
-                            <div className="font-medium">{file?.name}</div>
-                            <div className="text-sm text-neutral-500">
-                              {(file?.size! / 1024 / 1024).toFixed(2)} MB
+
+                  {fileList.length > 0 && (
+                    <div className="mt-6">
+                      <h2 className="text-lg font-medium mb-4">Uploaded Files</h2>
+                      <List
+                        dataSource={fileList}
+                        renderItem={(file: any) => (
+                          <List.Item
+                            className="bg-neutral-50 rounded-lg p-4 mb-2"
+                            actions={[
+                              <Button
+                                key="delete"
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleRemove(file)}
+                              />,
+                            ]}
+                          >
+                            <div className="flex items-center gap-4">
+                              <FileOutlined className="text-2xl text-primary-500" />
+                              <div>
+                                <div className="font-medium">{file?.name}</div>
+                                <div className="text-sm text-neutral-500">
+                                 {file?.size ? (file.size / 1024 / 1024).toFixed(2) + " MB" : "Unknown size"}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </List.Item>
-                    )}
-                  />
-                </div>
-              )}
+                          </List.Item>
+                        )}
+                      />
+                    </div>
+                  )}
 
-              <div className="mt-6 flex justify-end">
-                <Button
-                  type="primary"
-                  size="large"
-                  onClick={handleUpload}
-                  loading={apiCall.isPending}
-                  disabled={fileList.length === 0}
-                  className="bg-primary-500 hover:bg-primary-600"
-                >
-                  Upload Files
-                </Button>
+                </Card>
+              <div className='col-span-4'>
+                <SortableFilter onApply={handleApply} brnLoading={apiCall.isPending} isDisabled={fileList.length ? false : true} />
               </div>
-            </Card>
+
+            </div>
+
 
             {spreadsheetData.length > 0 && (
               <Card className="mt-8">
@@ -261,6 +259,7 @@ export default function Home() {
           </div>
         </Content>
       </Layout>
+
     </Layout>
   );
 }
