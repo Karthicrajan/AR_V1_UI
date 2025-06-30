@@ -1,14 +1,13 @@
+'use client'
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ConfigProvider } from 'antd';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'SaaS App',
-  description: 'Modern SaaS Application',
-};
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -18,15 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ConfigProvider
-          theme={{
-            token: {
-              colorPrimary: '#0ea5e9',
-            },
-          }}
-        >
+        <QueryClientProvider client={queryClient}>
           {children}
-        </ConfigProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

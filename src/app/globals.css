@@ -12,7 +12,6 @@ body {
   background: rgb(var(--background-rgb));
 }
 
-/* Custom utility classes */
 @layer components {
   .hover-card {
     @apply transition-all duration-300 hover:shadow-lg;
@@ -23,7 +22,6 @@ body {
   }
 }
 
-/* Ant Design overrides */
 .ant-layout {
   background: rgb(var(--background-rgb)) !important;
 }
@@ -40,7 +38,7 @@ body {
   @apply text-neutral-600;
 }
 
-/* Custom scrollbar */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
