@@ -41,7 +41,7 @@ function SortableItem({ id }) {
   );
 }
 
-export default function SortableFilter({ onApply }) {
+export default function SortableFilter({ onApply,brnLoading,isDisabled }) {
   const [items, setItems] = useState([
     "Active",
     "Pending",
@@ -84,9 +84,11 @@ export default function SortableFilter({ onApply }) {
         type="primary"
         block
         className="mt-4"
+        loading={brnLoading}
+        disabled={isDisabled}
         onClick={() => onApply?.(items)}
       >
-        Apply Filter Order
+        Apply Filter and Upload File
       </Button>
     </Card>
   );
