@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
-import { Card, Button } from "antd";
+import { Card, Button, Input } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 
 function SortableItem({ id }) {
@@ -41,52 +41,103 @@ function SortableItem({ id }) {
   );
 }
 
-export default function SortableFilter({ onApply,brnLoading,isDisabled }) {
-  const [items, setItems] = useState([
-    "Active",
-    "Pending",
-    "Completed",
-    "On Hold",
-    "Draft",
-  ]);
+export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
 
-  const sensors = useSensors(useSensor(PointerSensor));
-
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      setItems((prev) => {
-        const oldIndex = prev.indexOf(active.id);
-        const newIndex = prev.indexOf(over.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
-    }
-  };
+  const [mcare_limit, setMcareLimit] = useState("30");
+  const [bcbs_limit, setBcbsLimit] = useState("30");
+  const [other_limit, setOtherLimit] = useState("15");
+  const [high_aging_threshold, setHighAging] = useState("2000");
+  const [priority_ar_threshold, setPriorityAr] = useState("2000");
+  const [stop_when_limit_reached, setTotalUserLimit] = useState("25");
+  const [stopWhenLimitReached, setStopWhenLimitReached] = useState(false);
 
   return (
     <Card
-      title="Sort Filters"
+      title="Filter"
       className="w-full rounded-xl shadow-md border border-gray-200"
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
-          {items.map((item) => (
-            <SortableItem key={item} id={item} />
-          ))}
-        </SortableContext>
-      </DndContext>
-
+      
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">MCARE limit per user</label>
+        <Input
+          type="number"
+          value={mcare_limit}
+          onChange={e => setMcareLimit(e.target.value)}
+          placeholder="Enter MCARE limit"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">BCBS limit per user</label>
+        <Input
+          type="number"
+          value={bcbs_limit}
+          onChange={e => setBcbsLimit(e.target.value)}
+          placeholder="Enter BCBS limit"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">OTHER limit per user</label>
+        <Input
+          type="number"
+          value={other_limit}
+          onChange={e => setOtherLimit(e.target.value)}
+          placeholder="Enter OTHER limit"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">High Aging</label>
+        <Input
+          type="number"
+          value={high_aging_threshold}
+          onChange={e => setHighAging(e.target.value)}
+          placeholder="Enter High Aging Threshold"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">Priority A/R</label>
+        <Input
+          type="number"
+          value={priority_ar_threshold}
+          onChange={e => setPriorityAr(e.target.value)}
+          placeholder="Enter Priority A/R Threshold"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium mb-1">Total User limit</label>
+        <Input
+          type="number"
+          value={stop_when_limit_reached}
+          onChange={e => setTotalUserLimit(e.target.value)}
+          placeholder="Enter Total User Limit"
+        />
+      </div>
+      <div className="mb-2 flex items-center">
+        <input
+          type="checkbox"
+          id="stop_when_limit_reached"
+          checked={stopWhenLimitReached}
+          onChange={e => setStopWhenLimitReached(e.target.checked)}
+          className="mr-2"
+        />
+        <label htmlFor="stop_when_limit_reached" className="text-sm font-medium">
+          Stop when limit reached
+        </label>
+      </div>
       <Button
         type="primary"
         block
-        className="mt-4"
+        className="mt-2"
         loading={brnLoading}
         disabled={isDisabled}
-        onClick={() => onApply?.(items)}
+        onClick={() => onApply?.({
+          mcare_limit,
+          bcbs_limit,
+          other_limit,
+          high_aging_threshold,
+          priority_ar_threshold,
+          stop_when_limit_reached,
+          stop_when_limit_reached: stopWhenLimitReached
+        })}
       >
         Apply Filter and Upload File
       </Button>

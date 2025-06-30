@@ -45,12 +45,18 @@ export default function Home() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const apiCall = useMutation({
+  const apiCall =  useMutation({
+    
     mutationKey: ['upload-file'],
-    mutationFn: async () => {
+    mutationFn: async (selectFilter: any) => {
       const formData = new FormData();
       if (fileList.length > 0 && fileList[0].originFileObj) {
         formData.append('file', fileList[0].originFileObj as File);
+      }
+      if (selectFilter && typeof selectFilter === 'object') {
+        Object.entries(selectFilter).forEach(([key, value]) => {
+          formData.append(key, value != null ? String(value) : '');
+        });
       }
       try {
         const result = await uploadFile(formData);
@@ -103,21 +109,15 @@ export default function Home() {
     },
   });
 
-  const handleUpload = () => {
-    if (fileList.length === 0) {
-      antMessage.warning('Please select files to upload');
-      return;
-    }
-    apiCall.mutate();
-  };
+
 
   const handleRemove = (file: any) => {
     setFileList((prev: any) => prev.filter((f: any) => f?.uid !== file?.uid));
   };
 
   const handleApply = (selectFilter: any) => {
-    console.log(selectFilter)
-    apiCall.mutate();
+    console.log(selectFilter,"thank you AI")
+    apiCall.mutate(selectFilter);
 
   }
 
