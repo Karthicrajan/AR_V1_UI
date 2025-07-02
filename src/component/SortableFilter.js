@@ -14,7 +14,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
   const [high_aging_threshold, setHighAging] = useState("2000");
   const [priority_ar_threshold, setPriorityAr] = useState("2000");
   const [total_user_limit, setTotalUserLimit] = useState("25");
-  const [users, setUsers] = useState("");
+  const [userss, setUsers] = useState("");
   const [userError, setUserError] = useState(false)
 
   return (
@@ -23,7 +23,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
       className="w-full rounded-xl shadow-md border border-gray-200"
     >
       <div className="grid grid-cols-12 gap-4 items-center">
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">MCARE limit per user</label>
           <Input
             type="number"
@@ -32,7 +32,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter MCARE limit"
           />
         </div>
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">BCBS limit per user</label>
           <Input
             type="number"
@@ -41,7 +41,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter BCBS limit"
           />
         </div>
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">OTHER limit per user</label>
           <Input
             type="number"
@@ -50,7 +50,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter OTHER limit"
           />
         </div>
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">High Aging</label>
           <Input
             type="number"
@@ -59,7 +59,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter High Aging Threshold"
           />
         </div>
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">Priority A/R</label>
           <Input
             type="number"
@@ -68,7 +68,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter Priority A/R Threshold"
           />
         </div>
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium mb-1">Total User limit</label>
           <Input
             type="number"
@@ -77,19 +77,16 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
             placeholder="Enter Total User Limit"
           />
         </div>
-        <div className="mb-2 flex items-end col-span-6 gap-4">
-          <div>
+        <div className="w-50 mb-2 col-span-4">
             <label className="block text-sm font-medium mb-1">User(seprate the user by comma)</label>
             <TextArea
-              rows={1}
-              value={users}
+              rows={3}
+              value={userss}
               onChange={e => setUsers(e.target.value)}
               placeholder="Enter the User Name"
             />
-          </div>
-          <div>
-            {userError && <p className="text-red-500">Total user limit and user count not match</p>}
-          </div>
+            {userError && <p className="text-red-500">Total user limit is {total_user_limit} and user count not match is {userss.split(/\n+/).filter(name => name.trim()).length}</p>}
+        
         </div>
 
       </div>
@@ -100,10 +97,11 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
         loading={brnLoading}
         disabled={isDisabled}
         onClick={() => {
-          if (users.split(",").length != total_user_limit)
+          if (userss.split(/\n+/).filter(name => name.trim()).length != total_user_limit)
             setUserError(true);
           else {
             setUserError(false)
+            let users =  userss.split(/\n+/).filter(name => name.trim())
             onApply?.({
               mcare_limit,
               bcbs_limit,
@@ -111,7 +109,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
               high_aging_threshold,
               priority_ar_threshold,
               total_user_limit,
-              users,
+              users
             })
           }
         }}

@@ -26,7 +26,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-
+import { Flex, Spin } from 'antd';
 
 const { Header, Sider, Content } = Layout;
 const { Dragger } = Upload;
@@ -67,19 +67,14 @@ export default function Home() {
 
         if (jsonData.length === 0) return;
 
-        // Use first row as headers for AG Grid
         const headers = jsonData[0] as string[];
         const dataRows = jsonData.slice(1) as any[][];
-
-        // AG Grid columnDefs using header names
         const agColumnDefs = headers.map((header: string) => ({
           headerName: header || '',
           field: header || '',
           sortable: true,
           resizable: true,
         }));
-
-        // AG Grid rowData using header names as keys
         const agRowData = dataRows.map((rowArr: any[]) => {
           const rowObj: any = {};
           headers.forEach((header: string, idx: number) => {
@@ -109,7 +104,6 @@ export default function Home() {
   };
 
   const handleApply = (selectFilter: any) => {
-    console.log(selectFilter, "thank you AI")
     apiCall.mutate(selectFilter);
 
   }
@@ -154,9 +148,10 @@ export default function Home() {
 
             <Card className="hover:shadow-lg transition-shadow col-span-8">
               <Dragger
-                accept=".xls,.xlsx"
+                multiple={false}
+                accept=".xls,.xlsx,.csv"
                 fileList={fileList}
-                onChange={({ fileList }) => setFileList(fileList)}
+                onChange={({ fileList }) => setFileList([fileList[fileList.length - 1]])}
                 beforeUpload={() => false}
                 className="mb-4"
               >
@@ -167,8 +162,6 @@ export default function Home() {
                   Click or drag files to this area to upload
                 </p>
               </Dragger>
-
-
 
               <div className="mt-6">
                 <h2 className="text-lg font-medium mb-4">Uploaded Files</h2>
@@ -215,7 +208,13 @@ export default function Home() {
 
 
 
-            {spreadsheetData.length > 0 && (
+            {apiCall.isPending ? (
+              <div className='flex justify-center mt-4 mx-auto'>
+              <Flex align="center" gap="middle">
+              <Spin percent={"auto"} size="large" />
+               </Flex>
+               </div>
+            ) : (spreadsheetData.length > 0 && (
               <Card className="mt-8">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-medium">Excel Data Preview</h2>
@@ -252,7 +251,8 @@ export default function Home() {
                   </div>
                 </div>
               </Card>
-            )}
+            ))
+            }
           </div>
         </Content>
       </Layout>
