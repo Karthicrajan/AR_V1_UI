@@ -7,7 +7,6 @@ import {
   Button,
   theme,
   Card,
-  message as antMessage,
   Upload,
   List,
 } from 'antd';
@@ -45,8 +44,8 @@ export default function Home() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const apiCall =  useMutation({
-    
+  const apiCall = useMutation({
+
     mutationKey: ['upload-file'],
     mutationFn: async (selectFilter: any) => {
       const formData = new FormData();
@@ -68,37 +67,31 @@ export default function Home() {
 
         if (jsonData.length === 0) return;
 
-        // Convert to Spreadsheet format
-        const formatted = jsonData.map((row: any) =>
-          row.map((cell: any) => ({
-            value: cell ?? '',
-          }))
-        );
+        // Use first row as headers for AG Grid
+        const headers = jsonData[0] as string[];
+        const dataRows = jsonData.slice(1) as any[][];
 
-        setSpreadsheetData(formatted);
+        // AG Grid columnDefs using header names
+        const agColumnDefs = headers.map((header: string) => ({
+          headerName: header || '',
+          field: header || '',
+          sortable: true,
+          resizable: true,
+        }));
 
-        // AG Grid: Convert to columnDefs and rowData
-        if (formatted.length > 0) {
-          const agColumnDefs = formatted[0].map((_: any, colIdx: number) => ({
-            headerName: `Col ${colIdx + 1}`,
-            field: `col${colIdx}`,
-            filter: true,
-            sortable: true,
-            resizable: true,
-          }));
-          const agRowData = formatted.slice(1).map((rowArr: any[]) => {
-            const rowObj: any = {};
-            rowArr.forEach((cell: any, colIdx: number) => {
-              rowObj[`col${colIdx}`] = cell.value;
-            });
-            return rowObj;
+        // AG Grid rowData using header names as keys
+        const agRowData = dataRows.map((rowArr: any[]) => {
+          const rowObj: any = {};
+          headers.forEach((header: string, idx: number) => {
+            rowObj[header] = rowArr[idx] ?? '';
           });
-          setColumnDefs(agColumnDefs);
-          setRowData(agRowData);
-        } else {
-          setColumnDefs([]);
-          setRowData([]);
-        }
+          return rowObj;
+        });
+
+        setColumnDefs(agColumnDefs);
+        setRowData(agRowData);
+        setSpreadsheetData(jsonData as any[][]);
+
         setFileList([]);
 
         return result;
@@ -116,7 +109,7 @@ export default function Home() {
   };
 
   const handleApply = (selectFilter: any) => {
-    console.log(selectFilter,"thank you AI")
+    console.log(selectFilter, "thank you AI")
     apiCall.mutate(selectFilter);
 
   }
@@ -159,63 +152,67 @@ export default function Home() {
           <div className="mx-auto">
             <h1 className="text-2xl font-bold text-neutral-800 mb-6">File Upload</h1>
 
-            <div className='grid grid-cols-12 gap-10'>
-                <Card className="hover:shadow-lg transition-shadow col-span-8">
-                  <Dragger
-                    accept=".xls,.xlsx"
-                    fileList={fileList}
-                    onChange={({ fileList }) => setFileList(fileList)}
-                    beforeUpload={() => false}
-                    className="mb-4"
-                  >
-                    <p className="ant-upload-drag-icon">
-                      <InboxOutlined className="text-4xl text-primary-500" />
-                    </p>
-                    <p className="ant-upload-text text-lg font-medium">
-                      Click or drag files to this area to upload
-                    </p>
-                  </Dragger>
+            <Card className="hover:shadow-lg transition-shadow col-span-8">
+              <Dragger
+                accept=".xls,.xlsx"
+                fileList={fileList}
+                onChange={({ fileList }) => setFileList(fileList)}
+                beforeUpload={() => false}
+                className="mb-4"
+              >
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined className="text-4xl text-primary-500" />
+                </p>
+                <p className="ant-upload-text text-lg font-medium">
+                  Click or drag files to this area to upload
+                </p>
+              </Dragger>
 
 
-                  {fileList.length > 0 && (
-                    <div className="mt-6">
-                      <h2 className="text-lg font-medium mb-4">Uploaded Files</h2>
-                      <List
-                        dataSource={fileList}
-                        renderItem={(file: any) => (
-                          <List.Item
-                            className="bg-neutral-50 rounded-lg p-4 mb-2"
-                            actions={[
-                              <Button
-                                key="delete"
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleRemove(file)}
-                              />,
-                            ]}
-                          >
-                            <div className="flex items-center gap-4">
-                              <FileOutlined className="text-2xl text-primary-500" />
-                              <div>
-                                <div className="font-medium">{file?.name}</div>
-                                <div className="text-sm text-neutral-500">
-                                 {file?.size ? (file.size / 1024 / 1024).toFixed(2) + " MB" : "Unknown size"}
-                                </div>
-                              </div>
+
+              <div className="mt-6">
+                <h2 className="text-lg font-medium mb-4">Uploaded Files</h2>
+                {fileList.length > 0 ? (
+                  <List
+                    dataSource={fileList}
+                    renderItem={(file: any) => (
+                      <List.Item
+                        className="bg-neutral-50 rounded-lg p-4 mb-2"
+                        actions={[
+                          <Button
+                            key="delete"
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleRemove(file)}
+                          />,
+                        ]}
+                      >
+                        <div className="flex items-center gap-4">
+                          <FileOutlined className="text-2xl text-primary-500" />
+                          <div>
+                            <div className="font-medium">{file?.name}</div>
+                            <div className="text-sm text-neutral-500">
+                              {file?.size ? (file.size / 1024 / 1024).toFixed(2) + " MB" : "Unknown size"}
                             </div>
-                          </List.Item>
-                        )}
-                      />
-                    </div>
-                  )}
-
-                </Card>
-              <div className='col-span-4'>
-                <SortableFilter onApply={handleApply} brnLoading={apiCall.isPending} isDisabled={fileList.length ? false : true} />
+                          </div>
+                        </div>
+                      </List.Item>
+                    )}
+                  />) :
+                  <div className="bg-neutral-50 rounded-lg p-4 mb-2 h-[70px] flex items-center text-neutral-400">
+                    No files selected
+                  </div>
+                }
               </div>
 
-            </div>
+              <div className='mt-4'>
+                <SortableFilter onApply={handleApply} brnLoading={apiCall.isPending} isDisabled={fileList.length ? false : true} />
+              </div>
+            </Card>
+
+
+
 
 
             {spreadsheetData.length > 0 && (

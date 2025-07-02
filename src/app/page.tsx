@@ -3,11 +3,16 @@
 import React, { useState } from 'react';
 import { Layout, Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import Lottie from 'lottie-react';
+
 import animationData from '../../public/lottie/animation.json';
 import { useRouter } from 'next/navigation';
 
 const { Content } = Layout;
+import dynamic from 'next/dynamic';
+
+const Lottie = dynamic(() => import('lottie-react'), {
+  ssr: false,
+});
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,8 +27,8 @@ export default function LoginPage() {
       }else{
         message.error('Invalid username or password');
       }
-    } catch (error) {
-      message.error('Login failed. Please try again.');
+    } catch (error:any) {
+      message.error('Login failed. Please try again.', error);
     } finally {
       setLoading(false);
     }
