@@ -9,6 +9,7 @@ import {
   Card,
   Upload,
   List,
+  message,
 } from 'antd';
 import {
   InboxOutlined,
@@ -45,7 +46,6 @@ export default function Home() {
   } = theme.useToken();
 
   const apiCall = useMutation({
-
     mutationKey: ['upload-file'],
     mutationFn: async (selectFilter: any) => {
       const formData = new FormData();
@@ -97,20 +97,20 @@ export default function Home() {
     },
   });
 
-
-
   const handleRemove = (file: any) => {
     setFileList((prev: any) => prev.filter((f: any) => f?.uid !== file?.uid));
   };
 
   const handleApply = (selectFilter: any) => {
     apiCall.mutate(selectFilter);
-
-  }
+  };
 
   const handleDownloadExcel = () => {
-    const aoaData = spreadsheetData.map((row) => row.map((cell) => cell.value || ''));
-    const ws = XLSX.utils.aoa_to_sheet(aoaData);
+    if (!spreadsheetData || spreadsheetData.length === 0) {
+      message.warning('No data to export');
+      return;
+    }
+    const ws = XLSX.utils.aoa_to_sheet(spreadsheetData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, 'spreadsheet-export.xlsx');
@@ -204,16 +204,12 @@ export default function Home() {
               </div>
             </Card>
 
-
-
-
-
             {apiCall.isPending ? (
               <div className='flex justify-center mt-4 mx-auto'>
-              <Flex align="center" gap="middle">
-              <Spin percent={"auto"} size="large" />
-               </Flex>
-               </div>
+                <Flex align="center" gap="middle">
+                  <Spin percent={"auto"} size="large" />
+                </Flex>
+              </div>
             ) : (spreadsheetData.length > 0 && (
               <Card className="mt-8">
                 <div className="flex justify-between items-center mb-4">
@@ -256,7 +252,6 @@ export default function Home() {
           </div>
         </Content>
       </Layout>
-
     </Layout>
   );
 }
