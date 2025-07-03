@@ -85,7 +85,7 @@ export default function SortableFilter({ onApply, brnLoading, isDisabled }) {
               onChange={e => setUsers(e.target.value)}
               placeholder="Enter the User Name"
             />
-            {userError && <p className="text-red-500">Total user limit is {total_user_limit} and user count not match is {userss.split(/\n+/).filter(name => name.trim()).length}</p>}
+            {userError && <p className="text-red-500">Total user limit is {total_user_limit} and user count is {userss.split(/\n+/).filter(name => name.trim()).length}</p>}
         
         </div>
 
