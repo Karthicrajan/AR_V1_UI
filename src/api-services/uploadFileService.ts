@@ -3,12 +3,12 @@ import API from '@/lib/axiosInstance';
 
 export const uploadFile = async (payload: any) => {
     const data = await API.post(
-  'http://54.211.139.87:8080/upload/',
+  'http://3.232.107.80:8000/upload/',
   payload,
   {
-    responseType: 'arraybuffer', // 👈 tells Axios to return raw binary
+    responseType: 'arraybuffer',
     headers: {
-      'Content-Type': 'multipart/form-data', // if you're uploading a file
+      'Content-Type': 'multipart/form-data',
     },
   }
 );
