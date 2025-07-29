@@ -24,8 +24,6 @@ import { useMutation } from '@tanstack/react-query';
 import { uploadFile } from '@/api-services/uploadFileService';
 import * as XLSX from 'xlsx';
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { Flex, Spin } from 'antd';
 
@@ -40,6 +38,7 @@ export default function Home() {
   const [spreadsheetData, setSpreadsheetData] = useState<any[][]>([]);
   const [columnDefs, setColumnDefs] = useState<any[]>([]);
   const [rowData, setRowData] = useState<any[]>([]);
+
 
   const {
     token: { colorBgContainer, borderRadiusLG },
